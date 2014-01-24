@@ -8,6 +8,7 @@ module Hangman
 
 import System.IO
 import Data.List(foldl')
+import Control.Monad(mapM_)
 
 myLines :: String -> [String]
 myLines str = map (\s -> if last s  == '\r' then init s  else s) $ lines str
@@ -18,10 +19,7 @@ readWordFile filePath = do
     return $ myLines contents
 
 displayList :: [String] -> IO ()
-displayList [] = return ()
-displayList (x:xs) = do
-    putStrLn x
-    displayList xs
+displayList = mapM_ putStrLn
 
 countWordWithoutLetter :: [String] -> Char -> Int
 countWordWithoutLetter xs c  = foldl' f 0 xs
@@ -32,9 +30,4 @@ countWordWithoutLetter xs c  = foldl' f 0 xs
                 else acc
 
 removeWordsOfWrongLength :: Int -> [String] -> [String]
-removeWordsOfWrongLength n xs = foldl' f [] xs
-    where
-        f acc string = 
-            if length string == n
-                then (string:acc)
-                else acc
+removeWordsOfWrongLength n = filter (\string -> length string == n)
