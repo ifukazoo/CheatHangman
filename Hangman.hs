@@ -5,10 +5,12 @@ module Hangman
    , countWordWithoutLetter
    , removeWordsOfWrongLength
    , matchesPattern
+   , removeWordsWithoutLetter
+   , removeWordsWithLetter
  ) where
 
 import System.IO
-import Data.List(foldl')
+import Data.List(foldl', elemIndices)
 import Control.Monad(mapM_)
 
 myLines :: String -> [String]
@@ -51,3 +53,8 @@ matchesPattern str letter numbers =
             function False _ = False
             function acc n   = matchLetter str letter n
 
+removeWordsWithoutLetter :: Char -> [String] -> [String]
+removeWordsWithoutLetter letter = filter (\string -> not . null $ elemIndices letter string)
+
+removeWordsWithLetter :: Char -> [String] -> [String]
+removeWordsWithLetter letter = filter (\string -> null $ elemIndices letter string)

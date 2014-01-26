@@ -7,6 +7,7 @@ import Hangman
 main = do
     args <- getArgs
     let filePath = head args
-        n = read $ head $ tail args
+        {- n = read $ head $ tail args -}
+        n = head . head $ tail args
     wordList <- readWordFile filePath
-    displayList $ removeWordsOfWrongLength n wordList
+    displayList $ removeWordsWithLetter n wordList
