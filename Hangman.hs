@@ -4,6 +4,7 @@ module Hangman
    , displayList
    , countWordWithoutLetter
    , removeWordsOfWrongLength
+   , matchesPattern
  ) where
 
 import System.IO
@@ -31,3 +32,22 @@ countWordWithoutLetter xs c  = foldl' f 0 xs
 
 removeWordsOfWrongLength :: Int -> [String] -> [String]
 removeWordsOfWrongLength n = filter (\string -> length string == n)
+
+numberInPattern:: [Int] -> Int -> Bool
+numberInPattern [] _ = False
+numberInPattern (x:xs) n =
+    if x == n then True
+              else numberInPattern xs n
+
+matchLetter :: String -> Char -> Int -> Bool
+matchLetter str letter n
+    | n > (length str) -1 = False
+    | otherwise = str !! n  == letter
+
+matchesPattern :: String -> Char -> [Int] -> Bool
+matchesPattern str letter numbers =
+    foldl' function True numbers
+        where
+            function False _ = False
+            function acc n   = matchLetter str letter n
+
