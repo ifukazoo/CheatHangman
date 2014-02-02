@@ -6,8 +6,8 @@ import Hangman
 
 main = do
     args <- getArgs
-    let filePath = head args
-        {- n = read $ head $ tail args -}
-        n = head . head $ tail args
+    let (filePath:((letter:_):_)) = args
     wordList <- readWordFile filePath
-    displayList $ removeWordsWithLetter n wordList
+    displayList $ map f (patternByLetter (removeWordsWithoutLetter letter wordList) letter)
+                        where
+                             f ints = show ints

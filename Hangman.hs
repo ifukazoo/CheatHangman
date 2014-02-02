@@ -7,6 +7,7 @@ module Hangman
    , matchesPattern
    , removeWordsWithoutLetter
    , removeWordsWithLetter
+   , patternByLetter
  ) where
 
 import System.IO
@@ -58,3 +59,17 @@ removeWordsWithoutLetter letter = filter (\string -> not . null $ elemIndices le
 
 removeWordsWithLetter :: Char -> [String] -> [String]
 removeWordsWithLetter letter = filter (\string -> null $ elemIndices letter string)
+
+-- "america" -> [0, 6]
+-- "anaconda" -> [0, 2, 7]
+parsePattern :: String -> Char -> [Int]
+parsePattern str letter =
+    let (n, ns) = foldl' f (0, []) str
+    in reverse ns
+        where
+            f (n, acc) c = (n + 1, if c == letter then (n:acc) else acc)
+
+patternByLetter :: [String] -> Char -> [[Int]]
+patternByLetter strs letter = map f strs
+    where
+        f str = parsePattern str letter
