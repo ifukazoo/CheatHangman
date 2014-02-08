@@ -8,10 +8,11 @@ module Hangman
    , removeWordsWithoutLetter
    , removeWordsWithLetter
    , patternByLetter
+   , mostFreqPatternByLetter
  ) where
 
 import System.IO
-import Data.List(foldl', elemIndices)
+import Data.List(foldl', elemIndices, group, sort, sortBy, maximumBy)
 import Control.Monad(mapM_)
 
 myLines :: String -> [String]
@@ -60,8 +61,8 @@ removeWordsWithoutLetter letter = filter (\string -> not . null $ elemIndices le
 removeWordsWithLetter :: Char -> [String] -> [String]
 removeWordsWithLetter letter = filter (\string -> null $ elemIndices letter string)
 
--- "america" -> [0, 6]
--- "anaconda" -> [0, 2, 7]
+-- "america", a   -> [0, 6]
+-- "anaconda" , a -> [0, 2, 7]
 parsePattern :: String -> Char -> [Int]
 parsePattern str letter =
     let (n, ns) = foldl' f (0, []) str
@@ -73,3 +74,13 @@ patternByLetter :: [String] -> Char -> [[Int]]
 patternByLetter strs letter = map f strs
     where
         f str = parsePattern str letter
+
+mostFreqPatternByLetter :: [String] -> Char -> ([Int], Int)
+mostFreqPatternByLetter wordList letter = 
+    let patterns = patternByLetter (removeWordsWithoutLetter letter wordList) letter
+        compfunc = (\l r -> compare (length l) (length r))
+        maxPatterns = maximumBy compfunc $ (group . sortBy compfunc ) patterns
+        safehead [] = []
+        safehead xs = head xs
+    in  (safehead maxPatterns, length maxPatterns)
+
