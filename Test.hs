@@ -42,20 +42,20 @@ test_mathchesPattern =
     [
       TestCase(assertEqual "matchesPattern"
               False
-              (matchesPattern "abcaafg" 'a' [0]))
+              (matchesPattern "abcaafg" ('a',[0])))
     ]
 test_reduceByPattern  =
     [
       TestCase(assertEqual "reduceByPattern"
               ["abcdefg", "abcdefg"]
-              (reduceByPattern 'a' [0, 3] [
+              (reduceByPattern ('a',[0, 3]) [
                "abcaefg"
                , "abcdefg"
                , "abcaefg"
                , "abcdefg"]))
       , TestCase(assertEqual "reduceByPattern"
               ["abcaefg", "abcaafg"]
-              (reduceByPattern 'a' [0] [
+              (reduceByPattern ('a',[0]) [
                "abcaefg"
                , "abcdefg"
                , "abcaafg"
@@ -65,10 +65,10 @@ test_replaceAtByPattern =
     [
       TestCase(assertEqual "replaceAtByPattern"
               "@b@defg"
-              (replaceAtByPattern "abcdefg" '@' [0, 2]))
+              (replaceAtByPattern "abcdefg" ('@',[0, 2])))
       , TestCase(assertEqual "replaceAtByPattern"
               "@bcdefg"
-              (replaceAtByPattern "abcdefg" '@' [0]))
+              (replaceAtByPattern "abcdefg" ('@', [0])))
     ]
 test_replaceAt =
     [
@@ -88,24 +88,24 @@ test_local =
     [
       TestCase(assertEqual "local"
               [[0],[0]]
-              (maxPatterns $ patternByLetter [ "acceb" , "accdb" , "bccab", "b" ]  'a'))
+              (maxPatterns $ patternByLetter 'a' [ "acceb" , "accdb" , "bccab", "b" ] ))
     ]
 test_local2 =
     [
       TestCase(assertEqual "local"
               2
-              (length $ maxPatterns $ patternByLetter [ "acceb" , "accdb" , "bccab", "b" ]  'a'))
+              (length $ maxPatterns $ patternByLetter 'a' [ "acceb" , "accdb" , "bccab", "b" ] ))
     ]
 
 test_patternByLetter =
     [
       TestCase(assertEqual "patternByLetter"
               [[0],[0],[3],[]]
-              (patternByLetter [ "acceb" , "accdb" , "bccab", "b" ]  'a'))
+              (patternByLetter 'a' [ "acceb" , "accdb" , "bccab", "b" ]))
 
       , TestCase(assertEqual "patternByLetter"
               [[0, 3],[0, 3],[3],[]]
-              (patternByLetter [ "accab" , "accab" , "bccab" , "b"]  'a'))
+              (patternByLetter 'a' [ "accab" , "accab" , "bccab" , "b"]))
     ]
 
 test_mostFreqPatternByLetter = 
