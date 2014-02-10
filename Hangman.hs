@@ -75,15 +75,15 @@ patternByLetter strs letter = map f strs
     where
         f str = parsePattern str letter
 
-{- mostFreqPatternByLetter :: [String] -> Char -> ([[Int]], Int) -}
 mostFreqPatternByLetter :: [String] -> Char -> ([Int], Int)
 mostFreqPatternByLetter wordList letter = 
-    let patterns = patternByLetter (removeWordsWithoutLetter letter wordList) letter
+    let wordListWithLetter = removeWordsWithoutLetter letter wordList
+        patternList = patternByLetter wordListWithLetter letter {-[ [0] , [0,3], [1,4],...-}
+        maxPattern = maxNumberElement patternList
+    in  (safehead maxPattern, length maxPattern)
+    where
         compfunc = (\l r -> compare (length l) (length r))
-        maxPatterns = maximumBy compfunc $ (group . sort) patterns
+        maxNumberElement [] = []
+        maxNumberElement xs = maximumBy compfunc $ (group . sort) xs {-[ [0,3],[0,3],[0,3],[0,3],.. -}
         safehead [] = []
         safehead xs = head xs
-    in  (safehead maxPatterns, length maxPatterns)
-    {- in (sort patterns, 0) -}
-
-
