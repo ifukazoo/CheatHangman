@@ -4,11 +4,13 @@
 TARGETS	=\
 		 Hangman\
 		 Main\
+		 Test\
 
 all:$(TARGETS)
 
 Hangman:	Hangman.hs
 Main:		Main.hs
+Test:		Test.hs
 
 .PHONY:	clean
 clean:
