@@ -9,11 +9,13 @@ module Hangman
    , removeWordsWithLetter
    , patternByLetter
    , mostFreqPatternByLetter
+   , cheatHangMan
+   , replaceAt
+   , replaceAtByPattern
+   , reduceByPattern
  ) where
 
-import System.IO
-import Data.List(foldl', elemIndices, group, sort, sortBy, maximumBy)
-import Control.Monad(mapM_)
+import Data.List(foldl', elemIndices, group, sort, maximumBy)
 
 myLines :: String -> [String]
 myLines str = map (\s -> if last s  == '\r' then init s  else s) $ lines str
@@ -31,29 +33,17 @@ countWordWithoutLetter xs c  = foldl' f 0 xs
     where
         f acc string = 
             if any (\ch -> ch == c) string
-                then acc + 1
-                else acc
+                then acc
+                else acc + 1
 
 removeWordsOfWrongLength :: Int -> [String] -> [String]
 removeWordsOfWrongLength n = filter (\string -> length string == n)
 
-numberInPattern:: [Int] -> Int -> Bool
-numberInPattern [] _ = False
-numberInPattern (x:xs) n =
-    if x == n then True
-              else numberInPattern xs n
-
-matchLetter :: String -> Char -> Int -> Bool
-matchLetter str letter n
-    | n > (length str) -1 = False
-    | otherwise = str !! n  == letter
-
 matchesPattern :: String -> Char -> [Int] -> Bool
-matchesPattern str letter numbers =
-    foldl' function True numbers
-        where
-            function False _ = False
-            function acc n   = matchLetter str letter n
+matchesPattern str letter pattern = (elemIndices letter str) == pattern
+
+reduceByPattern :: Char -> [Int] -> [String] -> [String]
+reduceByPattern letter pattern = filter (\string -> matchesPattern string letter pattern)
 
 removeWordsWithoutLetter :: Char -> [String] -> [String]
 removeWordsWithoutLetter letter = filter (\string -> not . null $ elemIndices letter string)
@@ -65,7 +55,7 @@ removeWordsWithLetter letter = filter (\string -> null $ elemIndices letter stri
 -- "anaconda" , a -> [0, 2, 7]
 parsePattern :: String -> Char -> [Int]
 parsePattern str letter =
-    let (n, ns) = foldl' f (0, []) str
+    let (_, ns) = foldl' f (0, []) str
     in reverse ns
         where
             f (n, acc) c = (n + 1, if c == letter then (n:acc) else acc)
@@ -75,15 +65,42 @@ patternByLetter strs letter = map f strs
     where
         f str = parsePattern str letter
 
+replaceAt :: String -> Char -> Int -> String
+replaceAt source char nth = 
+    let (pre, (_:suf)) = splitAt nth source
+    in pre ++ (char:suf)
+
+replaceAtByPattern :: String -> Char -> [Int] -> String
+replaceAtByPattern source char nths = 
+    foldl' (\acc nth -> replaceAt acc char nth) source nths
+
+safeHead :: [[a]] -> [a]
+safeHead [] = []
+safeHead xs = head xs
+
 mostFreqPatternByLetter :: [String] -> Char -> ([Int], Int)
 mostFreqPatternByLetter wordList letter = 
     let wordListWithLetter = removeWordsWithoutLetter letter wordList
         patternList = patternByLetter wordListWithLetter letter {-[ [0] , [0,3], [1,4],...-}
         maxPattern = maxNumberElement patternList
-    in  (safehead maxPattern, length maxPattern)
+    in  (safeHead maxPattern, length maxPattern)
     where
         compfunc = (\l r -> compare (length l) (length r))
         maxNumberElement [] = []
         maxNumberElement xs = maximumBy compfunc $ (group . sort) xs {-[ [0,3],[0,3],[0,3],[0,3],.. -}
-        safehead [] = []
-        safehead xs = head xs
+
+cheatHangMan :: [String] -> String -> Char -> ([String], String)
+cheatHangMan wordList target letter =
+    let wordList' = removeWordsOfWrongLength (length target) wordList
+        (maxPattern, patternCount) = mostFreqPatternByLetter wordList' letter
+
+    in if (countWordWithoutLetter wordList' letter) > patternCount
+       then (removeWordsWithLetter letter wordList', target)
+       else funcB wordList' target letter maxPattern
+    where
+     funcB :: [String] -> String -> Char -> [Int] -> ([String], String)
+     funcB wordList' target letter maxPattern =
+        let revealedWord = replaceAtByPattern target letter maxPattern
+            wordList'' = reduceByPattern letter maxPattern wordList'
+
+        in  (wordList'', revealedWord)
